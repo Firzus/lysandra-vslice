@@ -31,6 +31,8 @@ jobs:
           projectPath: .
           testMode: editmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          customImage: unityci/editor:6000.0.38f1-linux-il2cpp-1
+          customParameters: -nographics
 
   test-playmode:
     name: Test in Play Mode
@@ -55,6 +57,8 @@ jobs:
           projectPath: .
           testMode: playmode
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          customImage: unityci/editor:6000.0.38f1-linux-il2cpp-1
+          customParameters: -nographics
 
   buildForSupportedPlatforms:
     name: Build for ${{ matrix.targetPlatform }}
@@ -84,6 +88,7 @@ jobs:
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          customImage: unityci/editor:6000.0.38f1-linux-il2cpp-1
       - uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
