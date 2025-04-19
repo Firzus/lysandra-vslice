@@ -10,7 +10,7 @@ on:
       runs-on: ubuntu-latest
       steps:
         - name: Print Hello World
-          run: echo "Hello World!"
+          run: echo "Hello World !"
 # env:
 #   UNITY_VERSION: 6000.0.3f1
 
