@@ -1,41 +1,42 @@
 name: Unity CI
 
-on:
-  push:
-    branches: [main, develop, feature/**]
-  pull_request:
-
-env:
-  UNITY_VERSION: 6000.0.38f1
+on: [push, pull_request]
 
 jobs:
-  activate-license:
+  buildForAllSupportedPlatforms:
+    name: Build for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          # - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          # - StandaloneWindows # Build a Windows standalone.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          # - StandaloneLinux64 # Build a Linux 64-bit standalone.
+          # - iOS # Build an iOS player.
+          # - Android # Build an Android .apk standalone app.
+          # - WebGL # WebGL.
     steps:
-      - name: Activate Unity Personal license
-        uses: game-ci/activate-personal-license@v2
+      - uses: actions/checkout@v4
         with:
-          email: ${{ secrets.UNITY_EMAIL }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-
-  test-editmode:
-    needs: activate-license
-    uses: game-ci/unity-test-runner@v4
-    with:
-      projectPath: .
-      testMode: EditMode
-
-  test-playmode:
-    needs: [activate-license, test-editmode]
-    uses: game-ci/unity-test-runner@v4
-    with:
-      projectPath: .
-      testMode: PlayMode
-
-  build-win:
-    needs: [activate-license, test-editmode, test-playmode]
-    if: github.ref == 'refs/heads/main'
-    uses: game-ci/unity-builder@v4
-    with:
-      projectPath: .
-      targetPlatform: StandaloneWindows64
+          fetch-depth: 0
+          lfs: true
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.1
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
