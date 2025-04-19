@@ -5,12 +5,12 @@ on:
     branches: [main, dev, feature/**]
   pull_request:
 
-  jobs:
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Print Hello World
-          run: echo "Hello World !"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Hello World
+        run: echo "Hello World !"
 # env:
 #   UNITY_VERSION: 6000.0.3f1
 
