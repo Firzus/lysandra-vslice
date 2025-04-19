@@ -6,36 +6,52 @@ on:
   pull_request:
 
 env:
-  UNITY_VERSION: 6000.0.38f1
+  UNITY_VERSION: 6000.0.38f1 # ↩︎ mets ta version Unity exacte
 
 jobs:
+  # 1 ────────────────────────────────────────────────────────────
   activate-license:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Activate Unity Personal license
         uses: game-ci/activate-personal-license@v2
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
 
+  # 2 ────────────────────────────────────────────────────────────
   test-editmode:
     needs: activate-license
-    uses: game-ci/unity-test-runner@v4
-    with:
-      projectPath: .
-      testMode: EditMode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: EditMode
 
+  # 3 ────────────────────────────────────────────────────────────
   test-playmode:
-    needs: [activate-license, test-editmode]
-    uses: game-ci/unity-test-runner@v4
-    with:
-      projectPath: .
-      testMode: PlayMode
+    needs: test-editmode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: PlayMode
 
+  # 4 ────────────────────────────────────────────────────────────
   build-win:
-    needs: [activate-license, test-editmode, test-playmode]
+    needs: test-playmode
     if: github.ref == 'refs/heads/main'
-    uses: game-ci/unity-builder@v4
-    with:
-      projectPath: .
-      targetPlatform: StandaloneWindows64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-builder@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneWindows64
