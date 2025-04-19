@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  UNITY_VERSION: 6000.0.3f1
+  UNITY_VERSION: 6000.0.38f1
 
 jobs:
   test-editmode:
