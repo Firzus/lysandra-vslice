@@ -6,23 +6,23 @@ on:
   pull_request:
 
 env:
-  UNITY_VERSION: 6000.0.38f1 # ↩︎ mets ta version Unity exacte
+  UNITY_VERSION: 6000.0.38f1 # ⇦ mets exactement la version Unity de ton projet
 
 jobs:
-  # 1 ────────────────────────────────────────────────────────────
+  # ───────────────────── 1. Activate licence ─────────────────────
   activate-license:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Activate Unity Personal license
-        uses: game-ci/activate-personal-license@v2
+      - name: Activate Unity Personal licence
+        uses: game-ci/unity-activate@v2 # ← nom correct
         with:
           email: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
+          unityVersion: ${{ env.UNITY_VERSION }}
 
-  # 2 ────────────────────────────────────────────────────────────
+  # ───────────────────── 2. EditMode tests ────────────────────────
   test-editmode:
     needs: activate-license
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: EditMode
 
-  # 3 ────────────────────────────────────────────────────────────
+  # ───────────────────── 3. PlayMode tests ────────────────────────
   test-playmode:
     needs: test-editmode
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: PlayMode
 
-  # 4 ────────────────────────────────────────────────────────────
+  # ───────────────────── 4. Windows build (main only) ─────────────
   build-win:
     needs: test-playmode
     if: github.ref == 'refs/heads/main'
