@@ -6,45 +6,32 @@ on:
   pull_request:
 
 env:
-  UNITY_VERSION: 6000.0.38f1 # ⇦ mets exactement la version Unity de ton projet
+  UNITY_VERSION: 6000.0.38f1 # <-- prends un tag Docker existant (liste sur hub.docker.com/r/unityci/editor/tags)
 
 jobs:
-  # ───────────────────── 1. Activate licence ─────────────────────
-  activate-license:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Activate Unity Personal licence
-        uses: game-ci/unity-activate@v2 # ← nom correct
-        with:
-          email: ${{ secrets.UNITY_EMAIL }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-
-  # ───────────────────── 2. EditMode tests ────────────────────────
   test-editmode:
-    needs: activate-license
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: EditMode
 
-  # ───────────────────── 3. PlayMode tests ────────────────────────
   test-playmode:
     needs: test-editmode
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           testMode: PlayMode
 
-  # ───────────────────── 4. Windows build (main only) ─────────────
   build-win:
     needs: test-playmode
     if: github.ref == 'refs/heads/main'
@@ -52,6 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneWindows64
