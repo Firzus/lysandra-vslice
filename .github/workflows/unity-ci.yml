@@ -1,0 +1,41 @@
+name: Unity CI
+
+on:
+  push:
+    branches: [main, develop, feature/**]
+  pull_request:
+
+env:
+  UNITY_VERSION: 6000.0.38f1
+
+jobs:
+  activate-license:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Activate Unity Personal license
+        uses: game-ci/activate-personal-license@v2
+        with:
+          email: ${{ secrets.UNITY_EMAIL }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+
+  test-editmode:
+    needs: activate-license
+    uses: game-ci/unity-test-runner@v4
+    with:
+      projectPath: .
+      testMode: EditMode
+
+  test-playmode:
+    needs: [activate-license, test-editmode]
+    uses: game-ci/unity-test-runner@v4
+    with:
+      projectPath: .
+      testMode: PlayMode
+
+  build-win:
+    needs: [activate-license, test-editmode, test-playmode]
+    if: github.ref == 'refs/heads/main'
+    uses: game-ci/unity-builder@v4
+    with:
+      projectPath: .
+      targetPlatform: StandaloneWindows64
