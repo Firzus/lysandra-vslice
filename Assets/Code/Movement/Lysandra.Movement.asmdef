@@ -1,0 +1,16 @@
+{
+    "name": "Lysandra.Movement",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1c7313f0194718a4a959ceef4a9176bc"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
