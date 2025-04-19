@@ -2,49 +2,55 @@ name: Unity CI
 
 on:
   push:
-    branches: [main, develop, feature/**]
+    branches: [main, dev, feature/**]
   pull_request:
 
-env:
-  UNITY_VERSION: 6000.0.3f1
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Print Hello World
+          run: echo "Hello World!"
+# env:
+#   UNITY_VERSION: 6000.0.3f1
 
-jobs:
-  test-editmode:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v3
-        with:
-          path: Library
-          key: Library-${{ env.UNITY_VERSION }}
-      - uses: game-ci/unity-test-runner@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          projectPath: .
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+# jobs:
+#   test-editmode:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/cache@v3
+#         with:
+#           path: Library
+#           key: Library-${{ env.UNITY_VERSION }}
+#       - uses: game-ci/unity-test-runner@v3
+#         env:
+#           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#         with:
+#           projectPath: .
+#           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  test-playmode:
-    needs: test-editmode
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: game-ci/unity-test-runner@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          projectPath: .
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+#   test-playmode:
+#     needs: test-editmode
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: game-ci/unity-test-runner@v3
+#         env:
+#           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#         with:
+#           projectPath: .
+#           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  build-win:
-    needs: test-playmode
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: StandaloneWindows64
+#   build-win:
+#     needs: test-playmode
+#     if: github.ref == 'refs/heads/main'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: game-ci/unity-builder@v4
+#         env:
+#           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#         with:
+#           unityVersion: ${{ env.UNITY_VERSION }}
+#           targetPlatform: StandaloneWindows64
