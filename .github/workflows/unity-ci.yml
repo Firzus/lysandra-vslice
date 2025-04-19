@@ -6,31 +6,35 @@ on:
   pull_request:
 
 env:
-  UNITY_VERSION: 6000.0.38f1 # <-- prends un tag Docker existant (liste sur hub.docker.com/r/unityci/editor/tags)
+  UNITY_VERSION: 6000.0.3f1
 
 jobs:
   test-editmode:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: game-ci/unity-test-runner@v4
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ env.UNITY_VERSION }}
+      - uses: game-ci/unity-test-runner@v3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: EditMode
+          projectPath: .
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
   test-playmode:
     needs: test-editmode
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: game-ci/unity-test-runner@v4
+      - uses: game-ci/unity-test-runner@v3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          testMode: PlayMode
+          projectPath: .
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
   build-win:
     needs: test-playmode
