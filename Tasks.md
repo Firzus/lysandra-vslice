@@ -1,4 +1,4 @@
-x## ✅ Sprint 0 – Architecture & Pipeline Robuste
+## ✅ Sprint 0 – Architecture & Pipeline Robuste
 
 - [ ] Configurer `SignalBus` global avec monitoring performance – **Core**
 - [ ] Implémenter `ServiceLocator` pattern centralisé – **Core**
