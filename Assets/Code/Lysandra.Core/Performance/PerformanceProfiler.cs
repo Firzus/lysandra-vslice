@@ -123,7 +123,7 @@ namespace Lysandra.Core.Performance
         /// <summary>
         /// Prend un échantillon complet des métriques de performance
         /// </summary>
-        private void SamplePerformanceMetrics()
+        private async void SamplePerformanceMetrics()
         {
             // Calcul des métriques moyennes
             float avgFrameTimeMs = _framesSinceLastSample > 0
@@ -175,7 +175,7 @@ namespace Lysandra.Core.Performance
             // Envoyer à un service d'analyse si configuré
             if (_config.SendToAnalyticsService)
             {
-                SendToAnalyticsServiceAsync();
+                await SendToAnalyticsServiceAsync();
             }
         }
 
