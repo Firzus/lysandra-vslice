@@ -64,60 +64,146 @@ namespace Lysandra.Core.Signals
         }
 
 #if UNITY_EDITOR
-        // Interface de débug (Editor Only)
+        // Interface de débug minimaliste et efficace (Editor Only)
         private void OnGUI()
         {
             if (!_showDebugWindow) return;
 
-            GUI.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.8f);
-
-            int width = 500;
-            int height = 300;
+            // Définir un style épuré
+            int width = 450;
+            int height = 270;
             int x = Screen.width - width - 10;
             int y = 10;
+            
+            // Créer les styles personnalisés pour l'interface
+            GUIStyle windowStyle = new GUIStyle(GUI.skin.window);
+            windowStyle.normal.background = CreateColorTexture(new Color(0.1f, 0.1f, 0.12f, 0.85f));
+            
+            GUIStyle headerStyle = new GUIStyle(GUI.skin.label);
+            headerStyle.normal.textColor = Color.white;
+            headerStyle.fontSize = 12;
+            headerStyle.fontStyle = FontStyle.Bold;
+            headerStyle.margin = new RectOffset(5, 5, 5, 5);
+            
+            GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
+            labelStyle.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
+            labelStyle.fontSize = 11;
+            
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+            buttonStyle.normal.textColor = Color.white;
+            buttonStyle.normal.background = CreateColorTexture(new Color(0.25f, 0.25f, 0.3f, 1f));
+            buttonStyle.hover.background = CreateColorTexture(new Color(0.3f, 0.3f, 0.35f, 1f));
+            
+            GUIStyle switchOnStyle = new GUIStyle(GUI.skin.button);
+            switchOnStyle.normal.textColor = Color.white;
+            switchOnStyle.normal.background = CreateColorTexture(new Color(0.2f, 0.6f, 0.3f, 1f));
+            switchOnStyle.hover.background = CreateColorTexture(new Color(0.25f, 0.65f, 0.35f, 1f));
+            switchOnStyle.fixedWidth = 80;
+            
+            GUIStyle switchOffStyle = new GUIStyle(GUI.skin.button);
+            switchOffStyle.normal.textColor = Color.white;
+            switchOffStyle.normal.background = CreateColorTexture(new Color(0.5f, 0.2f, 0.2f, 1f));
+            switchOffStyle.hover.background = CreateColorTexture(new Color(0.55f, 0.25f, 0.25f, 1f));
+            switchOffStyle.fixedWidth = 80;
+            
+            GUIStyle scrollViewStyle = new GUIStyle(GUI.skin.scrollView);
+            scrollViewStyle.normal.background = CreateColorTexture(new Color(0.15f, 0.15f, 0.17f, 0.8f));
+            
+            GUIStyle signalStyle = new GUIStyle(GUI.skin.label);
+            signalStyle.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
+            signalStyle.fontSize = 10;
+            signalStyle.margin = new RectOffset(5, 5, 1, 1);
+            
+            GUIStyle slowSignalStyle = new GUIStyle(signalStyle);
+            slowSignalStyle.normal.textColor = new Color(1f, 0.6f, 0.2f);
 
-            GUILayout.BeginArea(new Rect(x, y, width, height), "SignalBus Monitor", GUI.skin.window);
+            // Dessiner la fenêtre
+            GUILayout.BeginArea(new Rect(x, y, width, height), "Signal Monitor", windowStyle);
 
+            // Entête avec boutons de contrôle
             GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Reset Stats", GUILayout.Width(120)))
+            
+            // Bouton Reset
+            if (GUILayout.Button("Reset", buttonStyle, GUILayout.Width(70)))
             {
                 SignalPerformanceTracker.Reset();
             }
-
-            _enablePerformanceTracking = GUILayout.Toggle(_enablePerformanceTracking, "Enable Tracking");
-            SignalPerformanceTracker.TrackingEnabled = _enablePerformanceTracking;
-
-            _logSignals = GUILayout.Toggle(_logSignals, "Log Signals");
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-
-            GUILayout.Label($"Total Signals: {SignalPerformanceTracker.TotalSignalsEmitted}");
-            GUILayout.Label($"Signal Types: {SignalPerformanceTracker.SignalStatsCollection.Count}");
-            int totalChannels = _channelsByType.Count + _runtimeChannelsByType.Count;
-            GUILayout.Label($"Registered Channels: {totalChannels} ({_channelsByType.Count} editor, {_runtimeChannelsByType.Count} runtime)");
-
-            GUILayout.Label("Recent Signals:");
-            foreach (var record in SignalPerformanceTracker.RecentSignals)
+            
+            GUILayout.FlexibleSpace();
+            
+            // Bouton "Tracking" de style switch
+            string trackingLabel = _enablePerformanceTracking ? "Track: ON" : "Track: OFF";
+            GUIStyle trackingStyle = _enablePerformanceTracking ? switchOnStyle : switchOffStyle;
+            
+            if (GUILayout.Button(trackingLabel, trackingStyle))
             {
-                if (record.EmissionTimeMs > 1.0f)
-                {
-                    // Colorer en rouge les signaux lents
-                    GUI.contentColor = Color.red;
-                }
-                else
-                {
-                    GUI.contentColor = Color.white;
-                }
-
-                GUILayout.Label($"- {record.SignalType.Name}: {record.EmissionTimeMs:F2}ms");
-                GUI.contentColor = Color.white;
+                _enablePerformanceTracking = !_enablePerformanceTracking;
+                SignalPerformanceTracker.TrackingEnabled = _enablePerformanceTracking;
             }
-
+            
+            GUILayout.Space(10);
+            
+            // Bouton "Logging" de style switch
+            string logLabel = _logSignals ? "Log: ON" : "Log: OFF";
+            GUIStyle logStyle = _logSignals ? switchOnStyle : switchOffStyle;
+            
+            if (GUILayout.Button(logLabel, logStyle))
+            {
+                _logSignals = !_logSignals;
+            }
+            
+            GUILayout.EndHorizontal();
+            
+            GUILayout.Space(8);
+            
+            // Statistiques principales
+            GUILayout.BeginVertical();
+            GUILayout.Label($"Total: {SignalPerformanceTracker.TotalSignalsEmitted} signals • {SignalPerformanceTracker.SignalStatsCollection.Count} types • {_channelsByType.Count + _runtimeChannelsByType.Count} channels", labelStyle);
+            GUILayout.EndVertical();
+            
+            GUILayout.Space(5);
+            
+            // Zone déroulante pour les signaux récents
+            GUILayout.Label("Recent Signals:", headerStyle);
+            _debugScrollPosition = GUILayout.BeginScrollView(_debugScrollPosition, scrollViewStyle, GUILayout.Height(170));
+            
+            var recentSignals = SignalPerformanceTracker.RecentSignals;
+            int count = recentSignals.Count;
+            
+            // N'afficher que les 20 derniers signaux maximum, du plus récent au plus ancien
+            int startIndex = Mathf.Max(0, count - 20);
+            
+            // Si aucun signal, afficher un message
+            if (count == 0)
+            {
+                GUILayout.Label("  No signals recorded yet.", signalStyle);
+            }
+            
+            for (int i = count - 1; i >= startIndex; i--)
+            {
+                var record = recentSignals[i];
+                string signalText = $"• {record.SignalType.Name}: {record.EmissionTimeMs:F2}ms ({record.ListenersCount} listeners)";
+                
+                // Utiliser un style différent pour les signaux lents
+                GUILayout.Label(signalText, record.EmissionTimeMs > 1.0f ? slowSignalStyle : signalStyle);
+            }
+            
+            GUILayout.EndScrollView();
+            
             GUILayout.EndArea();
         }
+        
+        // Helper pour créer une texture de couleur unie
+        private Texture2D CreateColorTexture(Color color)
+        {
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, color);
+            tex.Apply();
+            return tex;
+        }
+
+        // Variable pour la position de défilement
+        private Vector2 _debugScrollPosition;
 #endif
 
         /// <summary>
