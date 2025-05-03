@@ -11,36 +11,35 @@ namespace Lysandra.Examples
     {
         // Référence au SignalBus (peut être injectée via ServiceLocator ou assignée directement)
         private SignalBus _signalBus;
-        
+
         [Header("Configuration")]
         [SerializeField] private int _startHealth = 100;
         [SerializeField] private int _maxHealth = 100;
-        [SerializeField] private bool _logEvents = true;
-        
+
         // Données internes
         private int _currentHealth;
         private bool _isDead = false;
         private string _currentStateName = "Idle";
-        
+
         private void Awake()
         {
             // Initialiser les valeurs
             _currentHealth = _startHealth;
-            
+
             // Récupérer le SignalBus depuis le ServiceLocator
             _signalBus = ServiceLocator.Instance.Get<SignalBus>();
         }
-        
+
         private void Start()
         {
             // S'abonner aux signaux pertinents
             _signalBus.AddListener<CommonSignals.AttackHit>(OnAttackHit);
             _signalBus.AddListener<CommonSignals.GamePaused>(OnGamePaused);
-            
+
             // Émettre un signal pour mettre à jour l'UI avec les stats initiales
             EmitHealthUpdateSignal();
         }
-        
+
         private void OnDestroy()
         {
             // Se désabonner des signaux pour éviter les fuites mémoire
@@ -50,7 +49,7 @@ namespace Lysandra.Examples
                 _signalBus.RemoveListener<CommonSignals.GamePaused>(OnGamePaused);
             }
         }
-        
+
         private void Update()
         {
             // Exemples d'interactions pour tester le système
@@ -58,22 +57,22 @@ namespace Lysandra.Examples
             {
                 TakeDamage(10);
             }
-            
+
             if (Input.GetKeyDown(KeyCode.R))
             {
                 Heal(20);
             }
-            
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 PerformAttack();
             }
-            
+
             if (Input.GetKeyDown(KeyCode.S))
             {
                 ChangeState("Running");
             }
-            
+
             if (Input.GetKeyDown(KeyCode.D))
             {
                 // Émet un signal de débug (pour tester le tracking de performance)
@@ -88,7 +87,7 @@ namespace Lysandra.Examples
                 }
             }
         }
-        
+
         // Gestionnaire pour les signaux de type AttackHit
         private void OnAttackHit(CommonSignals.AttackHit signal)
         {
@@ -96,27 +95,23 @@ namespace Lysandra.Examples
             if (signal.Target == gameObject)
             {
                 TakeDamage((int)signal.DamageDealt);
-                
-                Log($"Je suis touché par {signal.Attacker.name} pour {signal.DamageDealt} dégâts!");
             }
         }
-        
+
         // Gestionnaire pour les signaux de pause du jeu
         private void OnGamePaused(CommonSignals.GamePaused signal)
         {
-            Log($"Jeu {(signal.IsPaused ? "mis en pause" : "repris")}");
-            
             // Désactiver les comportements pendant la pause
             enabled = !signal.IsPaused;
         }
-        
+
         // Exemple de méthode qui prend des dégâts et émet des signaux
         public void TakeDamage(int amount)
         {
             if (_isDead) return;
-            
+
             _currentHealth -= amount;
-            
+
             // Émettre un signal de dégâts
             _signalBus.Emit(new CommonSignals.PlayerDamaged
             {
@@ -124,35 +119,31 @@ namespace Lysandra.Examples
                 HitPosition = transform.position,
                 DamageSource = null // Normalement, la source des dégâts
             });
-            
+
             // Mettre à jour l'UI de santé
             EmitHealthUpdateSignal();
-            
+
             // Vérifier si le joueur est mort
             if (_currentHealth <= 0)
             {
                 Die();
             }
         }
-        
+
         // Exemple de méthode de soin
         public void Heal(int amount)
         {
             if (_isDead) return;
-            
+
             _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
-            
+
             // Mettre à jour l'UI de santé
             EmitHealthUpdateSignal();
-            
-            Log($"Soigné de {amount}, santé actuelle: {_currentHealth}");
         }
-        
+
         // Exemple de méthode qui effectue une attaque et émet un signal
         public void PerformAttack()
         {
-            Log("Attaque!");
-            
             // Émettre un signal d'attaque
             _signalBus.Emit(new CommonSignals.AttackStarted
             {
@@ -160,11 +151,11 @@ namespace Lysandra.Examples
                 AttackName = "BasicAttack",
                 AttackPower = 20
             });
-            
+
             // Simuler une attaque réussie après un certain délai
             Invoke(nameof(SimulateHit), 0.2f);
         }
-        
+
         // Simuler un coup réussi
         private void SimulateHit()
         {
@@ -177,7 +168,7 @@ namespace Lysandra.Examples
                 HitPosition = transform.position + transform.forward,
                 IsCritical = Random.value > 0.7f
             });
-            
+
             // Créer un effet de hitstop (freeze temporaire) pour les coups puissants
             _signalBus.Emit(new CommonSignals.HitStop
             {
@@ -185,13 +176,13 @@ namespace Lysandra.Examples
                 TimeScale = 0.2f
             });
         }
-        
+
         // Exemple de changement d'état (pour un système FSM)
         public void ChangeState(string newState)
         {
             string previousState = _currentStateName;
             _currentStateName = newState;
-            
+
             // Émettre un signal de changement d'état
             _signalBus.Emit(new CommonSignals.PlayerStateChanged
             {
@@ -199,28 +190,24 @@ namespace Lysandra.Examples
                 CurrentState = newState,
                 StateTime = Time.time
             });
-            
-            Log($"Changement d'état: {previousState} -> {newState}");
         }
-        
+
         // Mort du personnage
         private void Die()
         {
             if (_isDead) return;
-            
+
             _isDead = true;
             _currentHealth = 0;
-            
+
             // Émettre un signal de mort
             _signalBus.Emit(new CommonSignals.PlayerDied
             {
                 DeathPosition = transform.position,
                 KilledBy = null // Normalement, l'entité qui a tué
             });
-            
-            Log("Mort!");
         }
-        
+
         // Helper pour mettre à jour l'UI de santé via signal
         private void EmitHealthUpdateSignal()
         {
@@ -230,7 +217,7 @@ namespace Lysandra.Examples
                 MaxValue = _maxHealth,
                 Animate = true
             });
-            
+
             // Émettre également un signal plus général de stats joueur
             _signalBus.Emit(new CommonSignals.PlayerStatsChanged
             {
@@ -239,15 +226,6 @@ namespace Lysandra.Examples
                 Stamina = 100, // Exemple, à remplacer par la vraie valeur
                 MaxStamina = 100 // Exemple, à remplacer par la vraie valeur
             });
-        }
-        
-        // Helper pour logger les messages si activé
-        private void Log(string message)
-        {
-            if (_logEvents)
-            {
-                Debug.Log($"[SignalBusExample] {message}");
-            }
         }
     }
 }

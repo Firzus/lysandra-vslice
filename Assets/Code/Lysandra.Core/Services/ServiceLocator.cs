@@ -12,56 +12,41 @@ namespace Lysandra.Core.Services
     {
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
         private readonly Dictionary<Type, List<Type>> _interfaceImplementations = new Dictionary<Type, List<Type>>();
-        
+
         // Singleton instance (thread-safe)
         private static readonly Lazy<ServiceLocator> _instance = new Lazy<ServiceLocator>(() => new ServiceLocator());
         public static ServiceLocator Instance => _instance.Value;
-        
+
         // Constructeur privé pour le singleton
         private ServiceLocator() { }
 
         /// <summary>
         /// Enregistre un service dans le locator
         /// </summary>
-        /// <typeparam name="T">Type du service</typeparam>
+        /// <typeparam name="T">Type d'interface du service</typeparam>
         /// <param name="service">Instance du service</param>
-        /// <param name="replaceExisting">Si true, remplace un service existant</param>
-        /// <exception cref="InvalidOperationException">Si le service existe déjà</exception>
-        public void Register<T>(T service, bool replaceExisting = false) where T : class
+        /// <param name="overrideExisting">Si true, remplace un service existant du même type</param>
+        public void Register<T>(T service, bool overrideExisting = false)
         {
-            Type serviceType = typeof(T);
-            
-            if (!replaceExisting && _services.ContainsKey(serviceType))
+            Type type = typeof(T);
+
+            if (_services.ContainsKey(type))
             {
-                throw new InvalidOperationException($"Service de type {serviceType.Name} déjà enregistré");
+                if (!overrideExisting)
+                {
+                    Debug.LogWarning($"[ServiceLocator] Service {type.Name} déjà enregistré");
+                    return;
+                }
+
+                _services.Remove(type);
             }
-            
-            _services[serviceType] = service;
-            
-            // Enregistrer également toutes les interfaces implémentées par ce service
-            foreach (var interfaceType in serviceType.GetInterfaces())
-            {
-                if (!_interfaceImplementations.TryGetValue(interfaceType, out var implementations))
-                {
-                    implementations = new List<Type>();
-                    _interfaceImplementations[interfaceType] = implementations;
-                }
-                
-                if (!implementations.Contains(serviceType))
-                {
-                    implementations.Add(serviceType);
-                }
-                
-                // Enregistrer aussi directement l'interface pour un accès direct
-                if (replaceExisting || !_services.ContainsKey(interfaceType))
-                {
-                    _services[interfaceType] = service;
-                }
-            }
-            
-            Debug.Log($"[ServiceLocator] Service enregistré: {serviceType.Name}");
+
+            _services.Add(type, service);
+
+            // Supprimer le log qui n'est pas utile en production
+            // Debug.Log($"[ServiceLocator] Service enregistré: {type.Name}");
         }
-        
+
         /// <summary>
         /// Récupère un service du locator
         /// </summary>
@@ -71,15 +56,15 @@ namespace Lysandra.Core.Services
         public T Get<T>() where T : class
         {
             Type serviceType = typeof(T);
-            
+
             if (!_services.TryGetValue(serviceType, out var service))
             {
                 throw new InvalidOperationException($"Service de type {serviceType.Name} non trouvé");
             }
-            
+
             return (T)service;
         }
-        
+
         /// <summary>
         /// Essaie de récupérer un service sans lever d'exception
         /// </summary>
@@ -89,17 +74,17 @@ namespace Lysandra.Core.Services
         public bool TryGet<T>(out T service) where T : class
         {
             Type serviceType = typeof(T);
-            
+
             if (_services.TryGetValue(serviceType, out var foundService))
             {
                 service = (T)foundService;
                 return true;
             }
-            
+
             service = null;
             return false;
         }
-        
+
         /// <summary>
         /// Récupère toutes les implémentations d'une interface
         /// </summary>
@@ -109,7 +94,7 @@ namespace Lysandra.Core.Services
         {
             Type interfaceType = typeof(T);
             var result = new List<T>();
-            
+
             if (_interfaceImplementations.TryGetValue(interfaceType, out var implementations))
             {
                 foreach (var implType in implementations)
@@ -120,10 +105,10 @@ namespace Lysandra.Core.Services
                     }
                 }
             }
-            
+
             return result;
         }
-        
+
         /// <summary>
         /// Supprime un service du locator
         /// </summary>
@@ -132,18 +117,18 @@ namespace Lysandra.Core.Services
         public bool Unregister<T>() where T : class
         {
             Type serviceType = typeof(T);
-            
+
             if (_services.TryGetValue(serviceType, out var service))
             {
                 _services.Remove(serviceType);
-                
+
                 // Enlever les références d'interface
                 foreach (var interfaceType in serviceType.GetInterfaces())
                 {
                     if (_interfaceImplementations.TryGetValue(interfaceType, out var implementations))
                     {
                         implementations.Remove(serviceType);
-                        
+
                         // Si c'est la dernière implémentation, supprimer aussi l'interface
                         if (implementations.Count == 0)
                         {
@@ -161,14 +146,14 @@ namespace Lysandra.Core.Services
                         }
                     }
                 }
-                
-                Debug.Log($"[ServiceLocator] Service désenregistré: {serviceType.Name}");
+
+                // Debug.Log($"[ServiceLocator] Service désenregistré: {serviceType.Name}");
                 return true;
             }
-            
+
             return false;
         }
-        
+
         /// <summary>
         /// Vérifie si un service est enregistré
         /// </summary>
@@ -178,7 +163,7 @@ namespace Lysandra.Core.Services
         {
             return _services.ContainsKey(typeof(T));
         }
-        
+
         /// <summary>
         /// Réinitialise le ServiceLocator (utile pour les tests ou les changements de scène)
         /// </summary>
@@ -186,10 +171,10 @@ namespace Lysandra.Core.Services
         {
             _services.Clear();
             _interfaceImplementations.Clear();
-            Debug.Log("[ServiceLocator] Réinitialisé");
+            // Debug.Log("[ServiceLocator] Réinitialisé");
         }
     }
-    
+
     /// <summary>
     /// Extensions du ServiceLocator pour faciliter l'injection de dépendances
     /// </summary>
@@ -201,7 +186,7 @@ namespace Lysandra.Core.Services
         public static void InjectDependencies(this ServiceLocator locator, object target)
         {
             var type = target.GetType();
-            
+
             // Injecter les propriétés
             foreach (var property in type.GetProperties())
             {
@@ -214,7 +199,7 @@ namespace Lysandra.Core.Services
                     }
                 }
             }
-            
+
             // Injecter les champs
             foreach (var field in type.GetFields())
             {
@@ -228,7 +213,7 @@ namespace Lysandra.Core.Services
                 }
             }
         }
-        
+
         /// <summary>
         /// Version générique du TryGet qui accepte un type à l'exécution
         /// </summary>
@@ -239,7 +224,7 @@ namespace Lysandra.Core.Services
                 // Utiliser la réflexion pour appeler la méthode générique TryGet<T>
                 var method = typeof(ServiceLocator).GetMethod("TryGet");
                 var genericMethod = method.MakeGenericMethod(serviceType);
-                
+
                 var parameters = new object[1];
                 var result = (bool)genericMethod.Invoke(locator, parameters);
                 service = parameters[0];
@@ -252,7 +237,7 @@ namespace Lysandra.Core.Services
             }
         }
     }
-    
+
     /// <summary>
     /// Attribut pour marquer les propriétés à injecter
     /// </summary>
