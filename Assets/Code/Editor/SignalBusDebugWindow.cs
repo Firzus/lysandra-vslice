@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEditor;
 using Lysandra.Core.Signals;
 using System.Linq;
-using UnityEngine.UIElements;
 
 namespace Lysandra.Editor
 {

@@ -14,13 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: VS_FalaisesAether
   m_GUID: 6912b8721672e0f46bea9ec29bf7a110
-  m_SerializeEntries:
-  - m_GUID: 3e359ed0015f3c1409bc2545074e78c4
-    m_Address: Crate
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - environment
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c32795e50b8916f4c9939c8f42fe0c49, type: 2}
   m_SchemaSet:
