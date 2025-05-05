@@ -151,7 +151,7 @@ MonoBehaviour:
   _persistAcrossScenes: 1
   _enablePerformanceTracking: 1
   _logSignals: 1
-  _showDebugWindow: 1
+  _showDebugWindow: 0
 --- !u!4 &23315487
 Transform:
   m_ObjectHideFlags: 0
