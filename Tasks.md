@@ -1,7 +1,7 @@
 ## ✅ Sprint 0 – Architecture & Pipeline Robuste
 
 - [x] Configurer `SignalBus` global avec monitoring performance – **Core**
-- [ ] Implémenter `ServiceLocator` pattern centralisé – **Core**
+- [x] Implémenter `ServiceLocator` pattern centralisé – **Core**
 - [ ] Ajouter `DebugOverlay` avancé : FPS, memory, drawcalls, currentState, stamina, netcode stats – **Tools**
 - [ ] Intégrer `FSMViewer` Editor avec visualisation runtime et historique de transitions – **Tools**
 - [ ] Créer `WorldStreamer` avec gestion LOD et occlusion culling – **Core**
