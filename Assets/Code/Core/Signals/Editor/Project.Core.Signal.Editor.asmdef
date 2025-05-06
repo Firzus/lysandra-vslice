@@ -1,0 +1,19 @@
+{
+    "name": "Project.Core.Signal.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9f30fe864422b1d489c8cfc0e6971549",
+        "GUID:6580c7b26f2cace4e8695584211ea251"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

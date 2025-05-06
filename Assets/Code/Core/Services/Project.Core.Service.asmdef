@@ -1,0 +1,16 @@
+{
+    "name": "Project.Core.Service",
+    "rootNamespace": "",
+    "references": [
+        "GUID:44a260387367aea44ab452b501838b29"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

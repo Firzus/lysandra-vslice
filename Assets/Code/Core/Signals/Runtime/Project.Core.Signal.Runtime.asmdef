@@ -1,0 +1,17 @@
+{
+    "name": "Project.Core.Signal.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9f30fe864422b1d489c8cfc0e6971549",
+        "GUID:40b877ed0bee3bc499be695c3dc2816e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
