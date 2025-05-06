@@ -63,29 +63,75 @@ Le but est de fournir un socle **solide, modulaire et élégant** pour prototype
 
 ### Structure des dossiers
 
-- **Scripts/**
-  - `Core/` – FSM, Interfaces, Services, Signals, Managers
-  - `Player/` – PlayerController, Input, FSM states, Configs
-  - `Combat/` – States, Abilities, ReactionSystem, HitResolver
-  - `Movement/` – Locomotion, Air, Climb, Dash, Glide, WallRun
-  - `Abilities/` – Compétences spécifiques (Dash, Blink, Heal, etc.)
-  - `UI/` – UIManager, Menus, HUD, Dialogue, Transitions
-  - `World/` – WorldStreamer, ChunkLoader, EnvironmentInteraction
-  - `DevTools/` – DebugOverlay, FSMViewer, TeleportTool, SceneDebugger
-- **Data/**
-  - `ScriptableObjects/` – Stats, AnimConfig, Abilities, Characters
-  - `Resources/` – Prefabs ou fichiers dynamiques référencés par SO
-- **Art/**
-  - `Models/` – Meshes 3D (Personnages, props, environnement)
-  - `Textures/` – Diffuse, Normal, Mask
-  - `VFX/` – FX visuels (slash, dash, UIFX)
-- **Audio/** – Musiques, SFX, dialogues, banks
-- **Animations/** – Controllers, Timeline, BlendTrees, Events
-- **Prefabs/** – Tous les objets du monde (players, ennemis, interactables)
-- **Scenes/**
-  - `Persistent/` – Système central (managers, UI, etc.)
-  - `World_*/` – Scènes de zones ouvertes (additive streaming)
-  - `Test/` – Scènes de prototypage ou démo technique
+- Code
+  - Core
+    - Services
+    - Signals
+    - Input
+    - SceneManagement
+  - External
+  - Features
+    - Abilities
+    - AI
+    - Combat
+    - Inventory
+    - Movement
+    - Player
+    - UI
+    - World
+    - Dialogue
+    - Quests
+  - Infrastructure
+  - Shared
+    - Utilities
+  - Tools
+    - Debugging
+    - Editor
+- Data
+  - ScriptableObjects
+  - Localization
+- Art
+  - Models
+  - Textures
+  - VFX
+- Audio
+- Plugins
+- Animations
+- Settings
+  - RenderPipeline
+    - `GlobalSettings.asset`
+    - Quality
+      - Low
+        Mobile / PC bas de gamme / debug perf
+        - `QualitySettings_Low.asset`
+        - `RendererFeature_Low.asset`
+      - Medium
+        PC moyen / consoles (mode performance)
+        - `QualitySettings_Medium.asset`
+        - `RendererFeature_Medium.asset`
+      - High
+        PC haut de gamme / consoles (mode qualité)
+        - `QualitySettings_High.asset`
+        - `RendererFeature_High.asset`
+  - PostProcessing
+    - `DefaultVolumeProfile.asset`
+    - `SampleSceneProfile.asset`
+  - Input
+    - `InputActions.inputactions`
+  - Lighting
+    - `LightmapSettings.asset`
+  - Audio
+    - `AudioMixer_Main.mixer`
+- Prefabs
+  - Characters
+  - Enemies
+  - UI
+  - WorldObjects
+- Scenes
+  - Persistent
+  - World_Zone
+    - World_Zone_X
+  - Test
 
 ---
 
