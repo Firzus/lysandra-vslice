@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
-namespace Lysandra.Core.Performance
+namespace Lysandra.Tools.Debugging
 {
     /// <summary>
     /// Système de profilage de performances avancé pour standards AAA.
