@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Lysandra.Core.Services
+namespace Project.Core.Services
 {
     /// <summary>
     /// Service Locator centralisé pour tous les services du jeu.

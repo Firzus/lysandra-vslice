@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Lysandra.Core.Signals
+namespace Project.Core.Signals
 {
     /// <summary>
     /// Classe contenant des signaux communs utilisés dans tout le projet
@@ -8,12 +8,12 @@ namespace Lysandra.Core.Signals
     public static class CommonSignals
     {
         #region Signaux du Core System
-        
+
         /// <summary>
         /// Signal émis lorsque le jeu est prêt (tous les managers chargés)
         /// </summary>
         public struct GameReady : ISignal { }
-        
+
         /// <summary>
         /// Signal émis lorsqu'une scène commence à être chargée
         /// </summary>
@@ -22,7 +22,7 @@ namespace Lysandra.Core.Signals
             public string SceneName;
             public float EstimatedLoadTime;
         }
-        
+
         /// <summary>
         /// Signal émis lorsqu'une scène est complètement chargée
         /// </summary>
@@ -31,7 +31,7 @@ namespace Lysandra.Core.Signals
             public string SceneName;
             public float ActualLoadTime;
         }
-        
+
         /// <summary>
         /// Signal émis lorsque le jeu est mis en pause
         /// </summary>
@@ -39,11 +39,11 @@ namespace Lysandra.Core.Signals
         {
             public bool IsPaused;
         }
-        
+
         #endregion
-        
+
         #region Signaux du Player
-        
+
         /// <summary>
         /// Signal émis lorsque le joueur change d'état (FSM)
         /// </summary>
@@ -53,7 +53,7 @@ namespace Lysandra.Core.Signals
             public string CurrentState;
             public float StateTime;
         }
-        
+
         /// <summary>
         /// Signal émis lorsque les stats du joueur changent
         /// </summary>
@@ -64,7 +64,7 @@ namespace Lysandra.Core.Signals
             public float Stamina;
             public float MaxStamina;
         }
-        
+
         /// <summary>
         /// Signal émis lorsque le joueur prend des dégâts
         /// </summary>
@@ -74,7 +74,7 @@ namespace Lysandra.Core.Signals
             public Vector3 HitPosition;
             public GameObject DamageSource;
         }
-        
+
         /// <summary>
         /// Signal émis lorsque le joueur meurt
         /// </summary>
@@ -83,11 +83,11 @@ namespace Lysandra.Core.Signals
             public GameObject KilledBy;
             public Vector3 DeathPosition;
         }
-        
+
         #endregion
-        
+
         #region Signaux de Combat
-        
+
         /// <summary>
         /// Signal émis lorsqu'une attaque commence
         /// </summary>
@@ -97,7 +97,7 @@ namespace Lysandra.Core.Signals
             public string AttackName;
             public float AttackPower;
         }
-        
+
         /// <summary>
         /// Signal émis lorsqu'une attaque touche
         /// </summary>
@@ -109,7 +109,7 @@ namespace Lysandra.Core.Signals
             public Vector3 HitPosition;
             public bool IsCritical;
         }
-        
+
         /// <summary>
         /// Signal émis pour déclencher un hitstop (ralentissement temporaire)
         /// </summary>
@@ -118,11 +118,11 @@ namespace Lysandra.Core.Signals
             public float Duration;
             public float TimeScale;
         }
-        
+
         #endregion
-        
+
         #region Signaux d'UI
-        
+
         /// <summary>
         /// Signal pour afficher un message à l'écran
         /// </summary>
@@ -131,7 +131,7 @@ namespace Lysandra.Core.Signals
             public string Message;
             public float Duration;
             public MessageType Type;
-            
+
             public enum MessageType
             {
                 Info,
@@ -140,7 +140,7 @@ namespace Lysandra.Core.Signals
                 Achievement
             }
         }
-        
+
         /// <summary>
         /// Signal pour ouvrir/fermer un menu
         /// </summary>
@@ -149,7 +149,7 @@ namespace Lysandra.Core.Signals
             public string MenuName;
             public bool IsOpen;
         }
-        
+
         /// <summary>
         /// Signal pour mettre à jour la barre de vie
         /// </summary>
@@ -159,7 +159,7 @@ namespace Lysandra.Core.Signals
             public float MaxValue;
             public bool Animate;
         }
-        
+
         /// <summary>
         /// Signal pour mettre à jour la barre de stamina
         /// </summary>
@@ -169,11 +169,11 @@ namespace Lysandra.Core.Signals
             public float MaxValue;
             public bool Animate;
         }
-        
+
         #endregion
-        
+
         #region Signaux de Debug
-        
+
         /// <summary>
         /// Signal pour enregistrer un événement de debug
         /// </summary>
@@ -182,7 +182,7 @@ namespace Lysandra.Core.Signals
             public string Category;
             public string Message;
             public LogLevel Level;
-            
+
             public enum LogLevel
             {
                 Verbose,
@@ -191,7 +191,7 @@ namespace Lysandra.Core.Signals
                 Error
             }
         }
-        
+
         /// <summary>
         /// Signal pour demander un rapport de performance
         /// </summary>
@@ -199,7 +199,7 @@ namespace Lysandra.Core.Signals
         {
             public bool Detailed;
         }
-        
+
         #endregion
     }
 }

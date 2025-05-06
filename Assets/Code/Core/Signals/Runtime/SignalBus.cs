@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Lysandra.Core.Services;
+using Project.Core.Services;
 
 #if UNITY_EDITOR
 using UnityEditor; // Ajout de la référence à UnityEditor
 #endif
 
-namespace Lysandra.Core.Signals
+namespace Project.Core.Signals
 {
     /// <summary>
     /// SignalBus central pour la communication entre systèmes

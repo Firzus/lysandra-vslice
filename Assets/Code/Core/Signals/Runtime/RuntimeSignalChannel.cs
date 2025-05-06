@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Lysandra.Core.Signals
+namespace Project.Core.Signals
 {
     /// <summary>
     /// Version non-générique du SignalChannel pour l'instanciation à l'exécution

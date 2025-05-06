@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using Lysandra.Core.Signals;
 using System.Linq;
+using Project.Core.Signals;
 
-namespace Lysandra.Editor
+namespace Project.Editor
 {
     /// <summary>
     /// Fenêtre d'éditeur pour visualiser et déboguer le système SignalBus
@@ -322,7 +322,7 @@ namespace Lysandra.Editor
             foreach (var stat in sortedByFreq)
             {
                 DrawSignalStatBar(
-                    stat.SignalTypeName,
+                    stat.SignalType.Name,
                     stat.EmissionCount,
                     SignalPerformanceTracker.TotalSignalsEmitted,
                     $"{stat.EmissionCount} émissions, moy: {stat.AverageTimeMs:F3}ms"
@@ -342,7 +342,7 @@ namespace Lysandra.Editor
             {
                 float maxTime = 5.0f; // Max 5ms comme référence
                 DrawSignalStatBar(
-                    stat.SignalTypeName,
+                    stat.SignalType.Name,
                     Mathf.Min(stat.AverageTimeMs, maxTime),
                     maxTime,
                     $"Temps: {stat.AverageTimeMs:F3}ms, {stat.EmissionCount} émissions",
@@ -411,14 +411,8 @@ namespace Lysandra.Editor
 
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        EditorGUILayout.LabelField($"Via: {record.ChannelName}", GUILayout.Width(200));
-                        EditorGUILayout.LabelField($"Frame: {record.FrameNumber}", GUILayout.Width(100));
-
-                        string timeLabel = record.EmissionTimeMs > 1.0f ?
-                            $"<color=orange>{record.EmissionTimeMs:F2}ms</color>" :
-                            $"{record.EmissionTimeMs:F2}ms";
-
-                        EditorGUILayout.LabelField($"Temps: {timeLabel}", new GUIStyle(EditorStyles.label) { richText = true });
+                        EditorGUILayout.LabelField("Via: Channel", GUILayout.Width(200));
+                        EditorGUILayout.LabelField("Time: " + record.Timestamp.ToString("HH:mm:ss"), GUILayout.Width(100));
                     }
 
                     EditorGUILayout.LabelField($"Listeners: {record.ListenersCount}");
@@ -724,9 +718,9 @@ namespace Lysandra.Editor
             }
 
             // Créer le contenu du fichier
-            string code = $@"using Lysandra.Core.Signals;
+            string code = $@"using Project.Core.Signals;
 
-namespace Lysandra.Signals
+namespace Project.Signals
 {{
     /// <summary>
     /// {_description}

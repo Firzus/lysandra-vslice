@@ -1,6 +1,6 @@
 using System;
 
-namespace Lysandra.Core.Signals
+namespace Project.Core.Signals
 {
     /// <summary>
     /// Interface de base pour tous les signaux du système

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Lysandra.Core.Services
+namespace Project.Core.Services
 {
     /// <summary>
     /// Adaptateur MonoBehaviour pour le ServiceLocator.

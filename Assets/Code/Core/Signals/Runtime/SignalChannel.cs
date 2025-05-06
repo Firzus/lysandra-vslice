@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Lysandra.Core.Signals
+namespace Project.Core.Signals
 {
     /// <summary>
     /// Classe de base pour tous les canaux de signaux

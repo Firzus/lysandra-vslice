@@ -1,8 +1,8 @@
 using UnityEngine;
-using Lysandra.Core.Signals;
-using Lysandra.Core.Services;
+using Project.Core.Signals;
+using Project.Core.Services;
 
-namespace Lysandra.Examples
+namespace Project.Examples
 {
     /// <summary>
     /// Exemple de composant utilisant le système de SignalBus
