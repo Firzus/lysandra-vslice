@@ -8,21 +8,24 @@ using Project.Core.FSM;
 namespace Project.Tools.Debugging.Editor
 {
     /// <summary>
-    /// Fenêtre d'éditeur pour visualiser les FSM (Finite State Machines) en temps réel
-    /// Affiche l'état courant, l'historique des transitions et permet l'inspection des FSM actives
+    /// Fenêtre d'éditeur extensible pour visualiser différents panels de debug (FSM, mémoire, input, etc.)
     /// </summary>
-    public class FSMViewerEditor : EditorWindow
+    public class DebugViewerEditor : EditorWindow
     {
+        private enum DebugPanel { FSM, /* Ajoute ici d'autres panels à l'avenir */ }
+        private DebugPanel _selectedPanel = DebugPanel.FSM;
+
+        // FSM Panel
         private Vector2 _scrollPosition;
         private int _selectedFSMIndex = 0;
         private string[] _fsmNames = Array.Empty<string>();
-        private List<object> _activeFSMs = new List<object>(); // À remplacer par le vrai type StateMachine<T>
+        private List<object> _activeFSMs = new List<object>();
         private bool _autoRefresh = true;
 
-        [MenuItem("Tools/Debug/FSM Viewer")]
+        [MenuItem("Tools/Debug/Debug Viewer")]
         public static void ShowWindow()
         {
-            var window = GetWindow<FSMViewerEditor>("FSM Viewer");
+            var window = GetWindow<DebugViewerEditor>("Debug Viewer");
             window.minSize = new Vector2(500, 350);
         }
 
@@ -39,35 +42,32 @@ namespace Project.Tools.Debugging.Editor
 
         private void OnEditorUpdate()
         {
-            if (_autoRefresh)
+            if (_autoRefresh && _selectedPanel == DebugPanel.FSM)
                 Repaint();
         }
 
-        private void RefreshFSMList()
+        private void OnGUI()
         {
-            // Recherche tous les MonoBehaviours de la scène qui exposent une méthode GetFSM()
-            var allBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-            var fsms = new List<StateMachine<IState>>();
-            var names = new List<string>();
+            // Onglets panels debug
+            _selectedPanel = (DebugPanel)GUILayout.Toolbar((int)_selectedPanel, new[] { "FSM" /*, "Mémoire", "Input", etc. */ });
+            EditorGUILayout.Space();
 
-            foreach (var behaviour in allBehaviours)
+            switch (_selectedPanel)
             {
-                var method = behaviour.GetType().GetMethod("GetFSM");
-                if (method != null && method.ReturnType == typeof(StateMachine<IState>))
-                {
-                    if (method.Invoke(behaviour, null) is StateMachine<IState> fsm)
-                    {
-                        fsms.Add(fsm);
-                        names.Add($"{behaviour.GetType().Name} ({behaviour.gameObject.name})");
-                    }
-                }
+                case DebugPanel.FSM:
+                    DrawFSMPanel();
+                    break;
+                    // case DebugPanel.Memory:
+                    //     DrawMemoryPanel();
+                    //     break;
+                    // case DebugPanel.Input:
+                    //     DrawInputPanel();
+                    //     break;
             }
-            _activeFSMs = fsms.Cast<object>().ToList();
-            _fsmNames = names.ToArray();
-            if (_selectedFSMIndex >= _fsmNames.Length) _selectedFSMIndex = 0;
         }
 
-        private void OnGUI()
+        // --- FSM PANEL ---
+        private void DrawFSMPanel()
         {
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
             if (GUILayout.Button("Rafraîchir", EditorStyles.toolbarButton))
@@ -87,6 +87,29 @@ namespace Project.Tools.Debugging.Editor
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
             DrawFSMDetails(_selectedFSMIndex);
             EditorGUILayout.EndScrollView();
+        }
+
+        private void RefreshFSMList()
+        {
+            var allBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            var fsms = new List<StateMachine<IState>>();
+            var names = new List<string>();
+
+            foreach (var behaviour in allBehaviours)
+            {
+                var method = behaviour.GetType().GetMethod("GetFSM");
+                if (method != null && method.ReturnType == typeof(StateMachine<IState>))
+                {
+                    if (method.Invoke(behaviour, null) is StateMachine<IState> fsm)
+                    {
+                        fsms.Add(fsm);
+                        names.Add($"{behaviour.GetType().Name} ({behaviour.gameObject.name})");
+                    }
+                }
+            }
+            _activeFSMs = fsms.Cast<object>().ToList();
+            _fsmNames = names.ToArray();
+            if (_selectedFSMIndex >= _fsmNames.Length) _selectedFSMIndex = 0;
         }
 
         private void DrawFSMDetails(int index)
@@ -117,5 +140,7 @@ namespace Project.Tools.Debugging.Editor
                 }
             }
         }
+
+        // --- Ajoute ici d'autres panels de debug (ex: mémoire, input, etc.) ---
     }
 }

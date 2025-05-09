@@ -7,9 +7,7 @@ public class DebugOverlayEditor : Editor
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
-        var overlay = (DebugOverlay)target;
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("État courant de la FSM", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField(overlay.CurrentFsmStateName);
+        EditorGUILayout.HelpBox("Ce composant affiche uniquement les FPS et la mémoire en runtime.", MessageType.Info);
     }
 }
