@@ -46,11 +46,11 @@ Le projet est structuré selon les standards de l'industrie AAA avec pipeline CI
 
 Pour comprendre rapidement la vision, les objectifs techniques et créatifs du projet, consultez ces documents internes :
 
-- [Instructions](Instructions.md)
+- [Instructions](.github\instructions.md)
   ➤ Architecture technique, outils, best practices, conventions
 - [Game Design Document](https://lprieu.notion.site/lysandra-gdd?pvs=4)
   ➤ Univers, gameplay, mécaniques, progression, DA
-- [Tasks](Tasks.md)
+- [Tasks](.github\tasks.md)
   ➤ Tâches à faire, état d'avancement, priorités actuelles
 - [API Documentation](https://lysandra-docs.example.com) - pas encoré implémenté
   ➤ Documentation technique auto-générée
