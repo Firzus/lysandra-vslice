@@ -130,7 +130,7 @@ namespace Project.Tools.Debugging.Runtime
         private void OnGUI()
         {
             float fps = 1.0f / _deltaTime;
-            long mem = Process.GetCurrentProcess().PrivateMemorySize64 / (1024 * 1024);
+            long mem = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024);
             string fsmState = "<None>";
             if (_cachedFsmInstance != null && _currentStateProp != null)
             {
