@@ -4,9 +4,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Profiling;
-using Debug = UnityEngine.Debug;
 
-namespace Project.Tools.Debugging
+namespace Project.Tools.Debugging.Runtime
 {
     /// <summary>
     /// Système de profilage de performances avancé pour standards AAA.
@@ -45,7 +44,6 @@ namespace Project.Tools.Debugging
         // Métriques internes
         private Dictionary<string, Stopwatch> _activeTimers = new Dictionary<string, Stopwatch>();
         private Dictionary<string, List<float>> _metricHistory = new Dictionary<string, List<float>>();
-        private Dictionary<string, long> _lastMemoryUsage = new Dictionary<string, long>();
 
         // État et timing
         private float _lastSampleTime;
@@ -102,7 +100,7 @@ namespace Project.Tools.Debugging
             // Alertes en temps réel pour hitches
             if (frameTimeMs > _config.FrameTimeCriticalThresholdMs)
             {
-                Debug.LogWarning($"[PerformanceProfiler] Hitch critique détecté: {frameTimeMs:F2}ms (frame: {Time.frameCount})");
+                UnityEngine.Debug.LogWarning($"[PerformanceProfiler] Hitch critique détecté: {frameTimeMs:F2}ms (frame: {Time.frameCount})");
                 LogCurrentSystemState();
             }
         }
@@ -163,7 +161,7 @@ namespace Project.Tools.Debugging
                                     $"Memory={totalAllocatedMemory}MB, " +
                                     $"DrawCalls={drawCalls}";
 
-                Debug.Log($"[PerformanceProfiler] {logMessage}");
+                UnityEngine.Debug.Log($"[PerformanceProfiler] {logMessage}");
             }
 
             // Sauvegarder dans un fichier si configuré
@@ -208,25 +206,25 @@ namespace Project.Tools.Debugging
             if (avgFrameTimeMs > _config.FrameTimeCriticalThresholdMs)
             {
                 string message = $"ALERTE CRITIQUE: Performance dégradée - AvgFrameTime={avgFrameTimeMs:F2}ms, Target=16.6ms";
-                Debug.LogError($"[PerformanceProfiler] {message}");
+                UnityEngine.Debug.LogError($"[PerformanceProfiler] {message}");
                 LogCurrentSystemState();
             }
             else if (avgFrameTimeMs > _config.FrameTimeWarningThresholdMs)
             {
                 string message = $"AVERTISSEMENT: Performance sous-optimale - AvgFrameTime={avgFrameTimeMs:F2}ms, Target=16.6ms";
-                Debug.LogWarning($"[PerformanceProfiler] {message}");
+                UnityEngine.Debug.LogWarning($"[PerformanceProfiler] {message}");
             }
 
             // Vérifier les seuils de mémoire
             if (totalMemoryMB > _config.MemoryCriticalThresholdMB)
             {
                 string message = $"ALERTE CRITIQUE: Utilisation mémoire élevée - {totalMemoryMB}MB (seuil={_config.MemoryCriticalThresholdMB}MB)";
-                Debug.LogError($"[PerformanceProfiler] {message}");
+                UnityEngine.Debug.LogError($"[PerformanceProfiler] {message}");
             }
             else if (totalMemoryMB > _config.MemoryWarningThresholdMB)
             {
                 string message = $"AVERTISSEMENT: Utilisation mémoire importante - {totalMemoryMB}MB (seuil={_config.MemoryWarningThresholdMB}MB)";
-                Debug.LogWarning($"[PerformanceProfiler] {message}");
+                UnityEngine.Debug.LogWarning($"[PerformanceProfiler] {message}");
             }
         }
 
@@ -260,7 +258,7 @@ namespace Project.Tools.Debugging
             stateInfo += $"Temps jeu: {Time.time:F2}s\n";
             stateInfo += $"Frame: {Time.frameCount}\n";
 
-            Debug.LogWarning($"[PerformanceProfiler] {stateInfo}");
+            UnityEngine.Debug.LogWarning($"[PerformanceProfiler] {stateInfo}");
         }
 
         /// <summary>
@@ -268,8 +266,30 @@ namespace Project.Tools.Debugging
         /// </summary>
         private void SaveToFile()
         {
-            // Implémentation à développer: sauvegarde des métriques dans un format JSON
-            // dans Application.persistentDataPath
+            try
+            {
+                var export = new Dictionary<string, object>();
+                foreach (var kvp in _metricHistory)
+                {
+                    export[kvp.Key] = kvp.Value.ToArray();
+                }
+                string json = JsonUtility.ToJson(new SerializationWrapper(export), true);
+                string filePath = System.IO.Path.Combine(Application.persistentDataPath, $"performance_metrics_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                System.IO.File.WriteAllText(filePath, json);
+                if (_config.LogToConsole)
+                    UnityEngine.Debug.Log($"[PerformanceProfiler] Sauvegarde des métriques dans {filePath}");
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogError($"[PerformanceProfiler] Erreur lors de la sauvegarde des métriques: {ex.Message}");
+            }
+        }
+
+        [Serializable]
+        private class SerializationWrapper
+        {
+            public Dictionary<string, object> metrics;
+            public SerializationWrapper(Dictionary<string, object> metrics) { this.metrics = metrics; }
         }
 
         /// <summary>
@@ -279,12 +299,42 @@ namespace Project.Tools.Debugging
         {
             try
             {
-                // Implémentation à développer: envoi des métriques à un service backend
-                await Task.Delay(1); // Placeholder - Correction: attendre l'opération
+                var export = new Dictionary<string, object>();
+                foreach (var kvp in _metricHistory)
+                {
+                    export[kvp.Key] = kvp.Value.ToArray();
+                }
+                if (_config.IncludeDeviceInfo)
+                {
+                    export["device"] = new Dictionary<string, object>
+                    {
+                        { "deviceModel", SystemInfo.deviceModel },
+                        { "deviceType", SystemInfo.deviceType.ToString() },
+                        { "operatingSystem", SystemInfo.operatingSystem },
+                        { "systemMemorySizeMB", SystemInfo.systemMemorySize },
+                        { "processorType", SystemInfo.processorType },
+                        { "graphicsDeviceName", SystemInfo.graphicsDeviceName }
+                    };
+                }
+                string json = JsonUtility.ToJson(new SerializationWrapper(export));
+                using (var www = new UnityEngine.Networking.UnityWebRequest(_config.AnalyticsEndpoint, "POST"))
+                {
+                    byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+                    www.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(bodyRaw);
+                    www.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
+                    www.SetRequestHeader("Content-Type", "application/json");
+                    var op = www.SendWebRequest();
+                    while (!op.isDone)
+                        await Task.Yield();
+                    if (www.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+                        UnityEngine.Debug.LogError($"[PerformanceProfiler] Analytics POST failed: {www.error}");
+                    else if (_config.LogToConsole)
+                        UnityEngine.Debug.Log("[PerformanceProfiler] Métriques envoyées à l'analytics backend.");
+                }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[PerformanceProfiler] Erreur lors de l'envoi des métriques: {ex.Message}");
+                UnityEngine.Debug.LogError($"[PerformanceProfiler] Erreur lors de l'envoi des métriques: {ex.Message}");
             }
         }
 
@@ -324,7 +374,7 @@ namespace Project.Tools.Debugging
                 return elapsedMs;
             }
 
-            Debug.LogWarning($"[PerformanceProfiler] Tentative d'arrêter un timer non démarré: {timerName}");
+            UnityEngine.Debug.LogWarning($"[PerformanceProfiler] Tentative d'arrêter un timer non démarré: {timerName}");
             return 0f;
         }
 
@@ -370,6 +420,11 @@ namespace Project.Tools.Debugging
         /// </summary>
         public PerformanceSnapshot GetCurrentPerformanceSnapshot()
         {
+            var timers = new Dictionary<string, float>(_activeTimers.Count);
+            foreach (var kvp in _activeTimers)
+            {
+                timers[kvp.Key] = kvp.Value.IsRunning ? kvp.Value.ElapsedMilliseconds : 0f;
+            }
             return new PerformanceSnapshot
             {
                 AverageFrameTimeMs = GetLatestMetricValue("AverageFrameTime"),
@@ -378,7 +433,7 @@ namespace Project.Tools.Debugging
                 TotalMemoryMB = (int)GetLatestMetricValue("TotalAllocatedMemory"),
                 ManagedHeapMB = (int)GetLatestMetricValue("ManagedHeapSize"),
                 DrawCalls = (int)GetLatestMetricValue("DrawCalls"),
-                CurrentTimers = new Dictionary<string, float>(_activeTimers.Count)
+                CurrentTimers = timers
             };
         }
 
