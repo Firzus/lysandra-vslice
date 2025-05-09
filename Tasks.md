@@ -3,7 +3,7 @@
 - [x] Configurer `SignalBus` global avec monitoring performance – **Core**
 - [x] Implémenter `ServiceLocator` pattern centralisé – **Core**
 - [ ] Ajouter `DebugOverlay` avancé : FPS, memory, drawcalls, currentState, stamina, netcode stats – **Tools**
-- [ ] Intégrer `FSMViewer` Editor avec visualisation runtime et historique de transitions – **Tools**
+- [x] Intégrer `FSMViewer` Editor avec visualisation runtime et historique de transitions – **Tools**
 - [ ] Créer `WorldStreamer` avec gestion LOD et occlusion culling – **Core**
 - [ ] Implémenter `MemoryManager` avec profiling et garbage collection optimisé – **Performance**
 - [ ] Préparer le `PlayableDirectorManager` avec timeline blending et support localization – **Cinematics**
