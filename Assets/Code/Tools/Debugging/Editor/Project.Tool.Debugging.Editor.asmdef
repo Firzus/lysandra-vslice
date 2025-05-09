@@ -1,0 +1,18 @@
+{
+  "name": "Project.Tool.Debugging.Editor",
+  "rootNamespace": "Project.Tools.Debugging.Editor",
+  "references": [
+    "Project.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
