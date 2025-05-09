@@ -1,7 +1,9 @@
 {
     "name": "Project.Tool.Debugging.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:97e1f11031ba5ad4b92b7dbbb359cf6b"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

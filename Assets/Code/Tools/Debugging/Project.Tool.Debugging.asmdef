@@ -1,14 +1,10 @@
 {
-    "name": "Project.Tool.Debugging.Editor",
+    "name": "Project.Tool.Debugging",
     "rootNamespace": "",
     "references": [
-        "GUID:44a260387367aea44ab452b501838b29",
-        "GUID:97e1f11031ba5ad4b92b7dbbb359cf6b",
-        "GUID:26ac04e75dbc34e4da6b8e5a8ed551c7"
+        "GUID:d9bd3b2812cb5124c8d8e67afb8a72c3"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

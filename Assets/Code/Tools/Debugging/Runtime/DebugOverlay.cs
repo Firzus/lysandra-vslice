@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Project.Tools.Debugging.Runtime
 {
     /// <summary>
-    /// Affiche un overlay debug runtime avec FPS, mémoire, et état courant de la FSM du joueur principal.
+    /// Affiche un overlay debug runtime avec FPS et mémoire.
     /// </summary>
     public class DebugOverlay : MonoBehaviour
     {
@@ -20,6 +20,23 @@ namespace Project.Tools.Debugging.Runtime
         private System.Type _cachedFsmSourceType;
         private System.Type _lastStateType;
         private bool _fsmNullWarningShown = false;
+
+        public string CurrentFsmStateName
+        {
+            get
+            {
+                if (_cachedFsmInstance != null && _currentStateProp != null)
+                {
+                    var currentState = _currentStateProp.GetValue(_cachedFsmInstance, null);
+                    if (currentState != null)
+                    {
+                        var nameProp = currentState.GetType().GetProperty("Name");
+                        return nameProp != null ? nameProp.GetValue(currentState, null) as string : "<Unknown>";
+                    }
+                }
+                return "<None>";
+            }
+        }
 
         private void Awake()
         {
@@ -131,28 +148,8 @@ namespace Project.Tools.Debugging.Runtime
         {
             float fps = 1.0f / _deltaTime;
             long mem = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024);
-            string fsmState = "<None>";
-            if (_cachedFsmInstance != null && _currentStateProp != null)
-            {
-                var currentState = _currentStateProp.GetValue(_cachedFsmInstance, null);
-                if (currentState != null)
-                {
-                    var stateType = currentState.GetType();
-                    if (_stateNameProp == null || _lastStateType != stateType)
-                    {
-                        _stateNameProp = stateType.GetProperty("Name");
-                        _lastStateType = stateType;
-                    }
-                    if (_stateNameProp != null)
-                    {
-                        var name = _stateNameProp.GetValue(currentState, null) as string;
-                        if (!string.IsNullOrEmpty(name))
-                            fsmState = name;
-                    }
-                }
-            }
-            string text = $"<b>FPS:</b> {fps:F1}\n<b>Mémoire:</b> {mem} MB\n<b>FSM:</b> {fsmState}";
-            GUI.Label(new Rect(16, 16, 350, 80), text, _style);
+            string text = $"<b>FPS:</b> {fps:F1}\n<b>Mémoire:</b> {mem} MB";
+            GUI.Label(new Rect(16, 16, 350, 50), text, _style);
         }
     }
 }
