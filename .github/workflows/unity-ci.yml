@@ -15,7 +15,7 @@ jobs:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      # UNITY_VERSION: 6000.0.38f1
+      UNITY_VERSION: 6000.0.38f1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,7 +23,7 @@ jobs:
           lfs: true
 
       - name: Cache Unity Library
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: Library
           key: Library-StandaloneWindows64-${{ hashFiles('ProjectSettings/ProjectVersion.txt', 'Packages/manifest.json', 'Packages/packages-lock.json') }}
@@ -39,7 +39,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: StandaloneWindows64
-          # unityVersion: ${{ env.UNITY_VERSION }}
+          unityVersion: ${{ env.UNITY_VERSION }}
 
       - name: Compress build artefact
         run: |
@@ -66,7 +66,7 @@ jobs:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      # UNITY_VERSION: 6000.0.38f1
+      UNITY_VERSION: 6000.0.38f1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,4 +77,4 @@ jobs:
         with:
           testMode: PlayMode
           artifactsPath: TestResults
-          # unityVersion: ${{ env.UNITY_VERSION }}
+          unityVersion: ${{ env.UNITY_VERSION }}
