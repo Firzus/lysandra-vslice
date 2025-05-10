@@ -22,7 +22,9 @@ namespace Project.Core.Signals
         [SerializeField] private bool _logSignals = false;
 
         [Header("Debug")]
+#if UNITY_EDITOR
         [SerializeField] private bool _showDebugWindow = false;
+#endif
 
         // Registre des canaux par type de signal
         private readonly Dictionary<Type, SignalChannelBase> _channelsByType = new();

@@ -21,9 +21,6 @@ namespace Project.Editor
         // Filtres et options d'affichage
         private string _searchFilter = "";
         private Vector2 _scrollPosition;
-        private bool _showPerformanceDetails = true;
-        private bool _showRecentSignals = true;
-        private bool _showChannels = true;
         private bool _autoRefresh = true;
         private int _selectedTab = 0;
         private readonly string[] _tabNames = { "Overview", "Channels", "Performance", "Recent Activity" };
