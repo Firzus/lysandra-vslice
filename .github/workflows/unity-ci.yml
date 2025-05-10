@@ -20,7 +20,7 @@ jobs:
 
     env:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }} # choose either this or UNITY_EMAIL/PASSWORD
-      UNITY_VERSION: 2022.3.22f1 # override with your LTS if needed
+      UNITY_VERSION: 6000.0.38f1 # override with your LTS if needed
 
     steps:
       # ----------------------------
