@@ -1,36 +1,22 @@
 name: unity-ci
 
-# ------------------------------------------------------------
-# CI/CD workflow to build and publish Windows Standalone builds
-# of a Unity project.  The workflow is triggered only when you
-# push a Git tag that matches the semantic‑version pattern
-# v<MAJOR>.<MINOR>.<PATCH> (e.g. v1.4.2).
-# ------------------------------------------------------------
-
 on:
   push:
     tags:
-      - "v*.*.*" # build + release only on version tags
-  pull_request: # still run regular CI on every PR
+      - "v*.*.*"
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build-windows:
     name: Build Windows Standalone (IL2CPP)
-    runs-on: ubuntu-latest # Wine is faster than native Windows
-
+    runs-on: ubuntu-latest
     env:
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }} # choose either this or UNITY_EMAIL/PASSWORD
-      UNITY_VERSION: 6000.0.38f1 # override with your LTS if needed
-
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_VERSION: 6000.0.38f1
     steps:
-      # ----------------------------
-      # 1) Checkout sources
-      # ----------------------------
       - uses: actions/checkout@v4
 
-      # ----------------------------
-      # 2) Cache the Library folder
-      # ----------------------------
       - name: Cache Unity Library
         uses: actions/cache@v4
         with:
@@ -39,54 +25,41 @@ jobs:
           restore-keys: |
             Library-
 
-      # ----------------------------
-      # 3) Build project with Game‑CI
-      # ----------------------------
       - name: Build StandaloneWindows64
-        uses: game-ci/unity-builder@v3
+        uses: game-ci/unity-builder@v4
         with:
           targetPlatform: StandaloneWindows64
-          allowDirtyBuild: true # skip git‑clean between builds
           unityVersion: ${{ env.UNITY_VERSION }}
 
-      # ----------------------------
-      # 4) Zip build & generate checksum
-      # ----------------------------
       - name: Compress build artefact
         run: |
           cd Build/StandaloneWindows64
-          # ‑9 = best compression, ‑m = move files after zipping (saves space)
           zip -r -9 -m ../../Build-StandaloneWindows64.zip .
           cd ../..
           sha256sum Build-StandaloneWindows64.zip > Build-StandaloneWindows64.sha256
 
-      # ----------------------------
-      # 5) Publish to GitHub Releases (only on tags)
-      # ----------------------------
       - name: Publish to GitHub Releases
         if: ${{ github.ref_type == 'tag' }}
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          draft: false # change to true to require manual review
           files: |
             Build-StandaloneWindows64.zip
             Build-StandaloneWindows64.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ------------------------------------------------------------
-  # Optional PlayMode performance & regression tests.
-  # This job depends on the build and can comment results
-  # back to the PR if desired.
-  # ------------------------------------------------------------
   tests:
     needs: build-windows
     runs-on: ubuntu-latest
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_VERSION: 6000.0.38f1
     steps:
       - uses: actions/checkout@v4
       - name: Run PlayMode tests
-        uses: game-ci/unity-test-runner@v3
+        uses: game-ci/unity-test-runner@v4
         with:
           testMode: PlayMode
           artifactsPath: TestResults
+          unityVersion: ${{ env.UNITY_VERSION }}
