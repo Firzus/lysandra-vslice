@@ -53,7 +53,7 @@ jobs:
           files: |
             build/**
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   tests:
     name: Run PlayMode tests
