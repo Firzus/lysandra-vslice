@@ -10,7 +10,6 @@ namespace Project.Core.Services
     public class ServiceLocatorBehaviour : MonoBehaviour
     {
         [SerializeField] private bool _persistAcrossScenes = true;
-        [SerializeField] private bool _logServiceOperations = true;
 
         private static ServiceLocatorBehaviour _instance;
 
