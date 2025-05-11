@@ -8,65 +8,42 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    name: Build Windows Standalone (IL2CPP)
-    runs-on: ubuntu-latest
+  buildForWindowsBasedPlatforms:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - .
+        unityVersion:
+          - 6000.0.38f1
+        targetPlatform:
+          - StandaloneWindows64
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
-
-      - name: Cache Unity Library
-        uses: actions/cache@v4
+      - uses: actions/cache@v3
         with:
-          path: Library
-          key: Library-StandaloneWindows64-${{ hashFiles('ProjectSettings/ProjectVersion.txt', 'Packages/manifest.json', 'Packages/packages-lock.json') }}
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ hashFiles(matrix.projectPath) }}
           restore-keys: |
-            Library-StandaloneWindows64-
+            Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.projectPath }}-
             Library-
-
-      - name: Build StandaloneWindows64
-        uses: game-ci/unity-builder@v4
+      - uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: StandaloneWindows64
-
-      - name: Compress build artefact
-        run: |
-          cd Build/StandaloneWindows64
-          zip -r -9 -m ../../Build-StandaloneWindows64.zip .
-          cd ../..
-          sha256sum Build-StandaloneWindows64.zip > Build-StandaloneWindows64.sha256
-
-      - name: Publish to GitHub Releases
-        if: ${{ github.ref_type == 'tag' }}
-        uses: softprops/action-gh-release@v2
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          customParameters: -myParameter myValue -myBoolean -ThirdParameter andItsValue
+      - uses: actions/upload-artifact@v3
         with:
-          generate_release_notes: true
-          files: |
-            Build-StandaloneWindows64.zip
-            Build-StandaloneWindows64.sha256
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  tests:
-    needs: build-windows
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
-      - name: Run PlayMode tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          testMode: PlayMode
-          artifactsPath: TestResults
+          name: Build
+          path: build
