@@ -1,0 +1,115 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  UNITY_VERSION: 6000.0.38f1
+  PROJECT_PATH: ./
+  BUILD_NAME: LysandraGame
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
+    steps:
+      # 1) Checkout
+      - uses: actions/checkout@v4
+
+      # 2) Cache du dossier Library (accélère les builds)
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.PROJECT_PATH }}/Library
+          key: Library-${{ hashFiles('**/*.cs') }}
+          restore-keys: |
+            Library-
+
+      # 3) Builder avec Game-CI
+      - name: Build Unity StandaloneWindows64
+        uses: game-ci/unity-builder@v3
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: StandaloneWindows64
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      # 4) Upload artefact ZIP-ready
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: build/StandaloneWindows64
+
+  # ─────────────────────────────────────────────────────────
+  release:
+    name: Package & Release
+    needs: build-windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 5) Récupère l’artefact Windows
+      - name: Download Windows build
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+          path: ./build/windows
+
+      # 6) Zip
+      - name: Zip Windows build
+        run: |
+          cd build/windows
+          7z a -tzip $GITHUB_WORKSPACE/game-${{ github.ref_name }}-windows.zip .
+
+      # 7) SHA-256
+      - name: Compute SHA-256
+        id: sha
+        run: echo "checksum=$(sha256sum game-${{ github.ref_name }}-windows.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      # 8) Manifeste JSON
+      - name: Create latest.json
+        run: |
+          cat <<EOF > latest.json
+          {
+            "version": "${{ github.ref_name }}",
+            "zip": {
+              "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/game-${{ github.ref_name }}-windows.zip",
+              "sha256": "${{ steps.sha.outputs.checksum }}"
+            }
+          }
+          EOF
+
+      # 9) Release GitHub
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            🚀 Nouvelle version ${{ github.ref_name }}
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 10) Upload assets
+      - name: Upload game ZIP
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: game-${{ github.ref_name }}-windows.zip
+          asset_name: game-${{ github.ref_name }}-windows.zip
+          asset_content_type: application/zip
+
+      - name: Upload manifest
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: latest.json
+          asset_name: latest.json
+          asset_content_type: application/json
