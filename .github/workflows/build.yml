@@ -12,7 +12,6 @@ env:
   BUILD_NAME: LysandraGame
 
 jobs:
-  # ─────────────────────────────────────────────────────────
   build-windows:
     name: Build Windows
     runs-on: windows-2022
@@ -45,7 +44,6 @@ jobs:
           name: windows-build
           path: build/StandaloneWindows64
 
-  # ─────────────────────────────────────────────────────────
   release:
     name: Package & Release
     needs: build-windows
