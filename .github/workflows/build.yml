@@ -7,7 +7,6 @@ on:
 env:
   PROJECT_PATH: ./ # racine du projet Unity
   BUILD_NAME: LysandraGame
-  UNITY_VERSION: 6000.0.38f1 # version Unity à utiliser pour le build
 
 jobs:
   # ────────────────────────────────────
@@ -20,7 +19,7 @@ jobs:
         include:
           # ← ajoute ici d'autres plateformes dans le futur
           - os: windows-2022
-            unityVersion: ${{ env.UNITY_VERSION }}
+            unityVersion: 6000.0.38f1
             targetPlatform: StandaloneWindows64
     steps:
       - uses: actions/checkout@v4 # :contentReference[oaicite:1]{index=1}
