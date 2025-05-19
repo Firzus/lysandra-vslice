@@ -1,12 +1,13 @@
 name: Build and Release
 on:
   push:
-    tags: ['v*']        # déclenché par un tag v1.2.3, v0.0.2-test, etc.
-  workflow_dispatch:    # ou exécution manuelle
+    tags: ["v*"] # déclenché par un tag v1.2.3, v0.0.2-test, etc.
+  workflow_dispatch: # ou exécution manuelle
 
 env:
-  PROJECT_PATH: ./      # racine du projet Unity
+  PROJECT_PATH: ./ # racine du projet Unity
   BUILD_NAME: LysandraGame
+  UNITY_VERSION: 6000.0.38f1 # version Unity à utiliser pour le build
 
 jobs:
   # ────────────────────────────────────
@@ -19,10 +20,10 @@ jobs:
         include:
           # ← ajoute ici d'autres plateformes dans le futur
           - os: windows-2022
-            unityVersion: 6000.0.38f1
+            unityVersion: ${{ env.UNITY_VERSION }}
             targetPlatform: StandaloneWindows64
     steps:
-      - uses: actions/checkout@v4                                                  # :contentReference[oaicite:1]{index=1}
+      - uses: actions/checkout@v4 # :contentReference[oaicite:1]{index=1}
 
       # Cache du dossier Library (Game-CI recommande de le faire) :contentReference[oaicite:2]{index=2}
       - uses: actions/cache@v3
@@ -35,7 +36,7 @@ jobs:
 
       # Build Unity (Game-CI) :contentReference[oaicite:3]{index=3}
       - name: Build ${{ matrix.targetPlatform }}
-        uses: game-ci/unity-builder@v3
+        uses: game-ci/unity-builder@v4
         with:
           unityVersion: ${{ matrix.unityVersion }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -53,7 +54,7 @@ jobs:
   # ────────────────────────────────────
   release:
     name: Package & Release
-    needs: build                 # attend que TOUTES les matrices « build » soient finies
+    needs: build # attend que TOUTES les matrices « build » soient finies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +62,7 @@ jobs:
       # ↓↓ pour l'instant on ne télécharge que le build Windows ; si tu ajoutes d’autres OS,
       #    répète ou boucle sur download-artifact以 adapter.
       - name: Download Windows build
-        uses: actions/download-artifact@v4                                       # :contentReference[oaicite:5]{index=5}
+        uses: actions/download-artifact@v4 # :contentReference[oaicite:5]{index=5}
         with:
           name: build-StandaloneWindows64
           path: ./build/windows
