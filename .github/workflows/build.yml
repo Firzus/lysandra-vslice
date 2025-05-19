@@ -39,7 +39,7 @@ jobs:
 
       # 4) Upload artefact ZIP-ready
       - name: Upload Windows Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: build/StandaloneWindows64
