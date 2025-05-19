@@ -1,76 +1,87 @@
 name: Build and Release
-
 on:
   push:
-    tags:
-      - "v*"
-  workflow_dispatch:
+    tags: ['v*']        # déclenché par un tag v1.2.3, v0.0.2-test, etc.
+  workflow_dispatch:    # ou exécution manuelle
 
 env:
-  PROJECT_PATH: ./
+  PROJECT_PATH: ./      # racine du projet Unity
   BUILD_NAME: LysandraGame
 
 jobs:
-  build-windows:
-    name: Build Windows
-    runs-on: windows-2022
+  # ────────────────────────────────────
+  build:
+    name: Build ${{ matrix.targetPlatform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ← ajoute ici d'autres plateformes dans le futur
+          - os: windows-2022
+            unityVersion: 6000.0.38f1
+            targetPlatform: StandaloneWindows64
     steps:
-      # 1) Checkout
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4                                                  # :contentReference[oaicite:1]{index=1}
 
-      # 2) Cache du dossier Library (accélère les builds)
+      # Cache du dossier Library (Game-CI recommande de le faire) :contentReference[oaicite:2]{index=2}
       - uses: actions/cache@v3
         with:
           path: ${{ env.PROJECT_PATH }}/Library
-          key: Library-${{ hashFiles('**/*.cs') }}
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('**/*.cs') }}
           restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
             Library-
 
-      # 3) Builder avec Game-CI
-      - name: Build Unity StandaloneWindows64
+      # Build Unity (Game-CI) :contentReference[oaicite:3]{index=3}
+      - name: Build ${{ matrix.targetPlatform }}
         uses: game-ci/unity-builder@v3
         with:
+          unityVersion: ${{ matrix.unityVersion }}
           projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: StandaloneWindows64
+          targetPlatform: ${{ matrix.targetPlatform }}
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-      # 4) Upload artefact ZIP-ready
-      - name: Upload Windows Build Artifact
+      # Upload artefact avec v4 :contentReference[oaicite:4]{index=4}
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-build
-          path: build/StandaloneWindows64
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
 
+  # ────────────────────────────────────
   release:
     name: Package & Release
-    needs: build-windows
+    needs: build                 # attend que TOUTES les matrices « build » soient finies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # 5) Récupère l’artefact Windows
+      # ↓↓ pour l'instant on ne télécharge que le build Windows ; si tu ajoutes d’autres OS,
+      #    répète ou boucle sur download-artifact以 adapter.
       - name: Download Windows build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4                                       # :contentReference[oaicite:5]{index=5}
         with:
-          name: windows-build
+          name: build-StandaloneWindows64
           path: ./build/windows
 
-      # 6) Zip
+      # Zip avec 7-Zip (installé sur l’image ubuntu-latest)
       - name: Zip Windows build
         run: |
           cd build/windows
           7z a -tzip $GITHUB_WORKSPACE/game-${{ github.ref_name }}-windows.zip .
 
-      # 7) SHA-256
+      # SHA-256 du ZIP
       - name: Compute SHA-256
         id: sha
-        run: echo "checksum=$(sha256sum game-${{ github.ref_name }}-windows.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
+        run: |
+          echo "checksum=$(sha256sum game-${{ github.ref_name }}-windows.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
 
-      # 8) Manifeste JSON
+      # Génère latest.json
       - name: Create latest.json
         run: |
-          cat <<EOF > latest.json
+          cat > latest.json <<EOF
           {
             "version": "${{ github.ref_name }}",
             "zip": {
@@ -80,20 +91,18 @@ jobs:
           }
           EOF
 
-      # 9) Release GitHub
+      # Crée la Release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
-          body: |
-            🚀 Nouvelle version ${{ github.ref_name }}
-          draft: false
+          body: "🚀 Nouvelle version ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 10) Upload assets
+      # Upload ZIP et manifeste
       - name: Upload game ZIP
         uses: actions/upload-release-asset@v1
         with:
