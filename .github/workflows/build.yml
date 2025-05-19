@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  UNITY_VERSION: [6000.0.38f1]
   PROJECT_PATH: ./
   BUILD_NAME: LysandraGame
 
@@ -31,7 +30,6 @@ jobs:
       - name: Build Unity StandaloneWindows64
         uses: game-ci/unity-builder@v3
         with:
-          unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
           targetPlatform: StandaloneWindows64
         env:
