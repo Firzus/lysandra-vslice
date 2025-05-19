@@ -93,8 +93,7 @@ jobs:
           }
           EOF
 
-      # Crée la Release
-      - name: Create Release
+        # Crée la Release      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
@@ -102,7 +101,7 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           body: "🚀 Nouvelle version ${{ github.ref_name }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       # Upload ZIP et manifeste
       - name: Upload game ZIP
@@ -112,6 +111,8 @@ jobs:
           asset_path: game-${{ github.ref_name }}-windows.zip
           asset_name: game-${{ github.ref_name }}-windows.zip
           asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload manifest
         uses: actions/upload-release-asset@v1
@@ -120,3 +121,5 @@ jobs:
           asset_path: latest.json
           asset_name: latest.json
           asset_content_type: application/json
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
