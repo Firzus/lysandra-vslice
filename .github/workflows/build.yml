@@ -54,9 +54,13 @@ jobs:
 
       - name: Zip Build
         run: |
-          cd build/${{ matrix.targetPlatform }}
-          zip -r ../../../game-${{ github.ref_name }}-${{ matrix.extension }} .
-        shell: bash
+          if ($IsWindows) {
+            Compress-Archive -Path "build/${{ matrix.targetPlatform }}/*" -DestinationPath "game-${{ github.ref_name }}-${{ matrix.extension }}"
+          } else {
+            cd build/${{ matrix.targetPlatform }}
+            zip -r ../../../game-${{ github.ref_name }}-${{ matrix.extension }} .
+          }
+        shell: pwsh
 
       - name: Compute SHA256
         id: hash
