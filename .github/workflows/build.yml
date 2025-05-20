@@ -66,10 +66,11 @@ jobs:
 
       - name: Compute SHA256
         id: hash
+        shell: pwsh
         run: |
-          FILE="game-${{ github.ref_name }}-${{ matrix.extension }}"
-          HASH=$(shasum -a 256 "$FILE" | cut -d ' ' -f 1)
-          echo "sha256=$HASH" >> $GITHUB_OUTPUT
+          $file = "game-${{ github.ref_name }}-${{ matrix.extension }}"
+          $hash = Get-FileHash -Algorithm SHA256 -Path $file
+          echo "sha256=$($hash.Hash)" >> $env:GITHUB_OUTPUT
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
