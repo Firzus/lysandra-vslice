@@ -75,7 +75,7 @@ jobs:
         run: |
           echo "${{ matrix.target }}|game-${{ github.ref_name }}-${{ matrix.extension }}|${{ steps.hash.outputs.sha256 }}" >> build-meta.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build-meta
           path: build-meta.txt
