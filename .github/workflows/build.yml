@@ -115,7 +115,7 @@ jobs:
           while IFS='|' read -r os file hash; do
             echo "    \"$os\": {" >> latest.json
             echo "      \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$file\"," >> latest.json
-            echo "      \"sha256\": \"$hash\"" >> latest.json
+            echo "      \"sha256\": \"${hash//$'\r'/}\"" >> latest.json
             if [ "$i" -lt "$TOTAL" ]; then
               echo "    },"
             else
