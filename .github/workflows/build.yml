@@ -85,7 +85,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: manifest-parts
+          name: manifest-part-${{ matrix.target }}
           path: manifest-data.txt
 
   generate-manifest:
@@ -95,8 +95,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: build-meta
-          path: meta
+          pattern: manifest-part-*
+          path: parts
+          merge-multiple: true
 
       - name: Create latest.json
         run: |
