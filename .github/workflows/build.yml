@@ -54,20 +54,23 @@ jobs:
 
       - name: Zip Build
         run: |
+          $zipName = "game-${{ github.ref_name }}-${{ matrix.extension }}"
+          $zipPath = "${{ github.workspace }}/$zipName"
+
           if ($IsWindows) {
-            Compress-Archive -Path "build/${{ matrix.targetPlatform }}/*" -DestinationPath "game-${{ github.ref_name }}-${{ matrix.extension }}"
+            Compress-Archive -Path "build/${{ matrix.targetPlatform }}/*" -DestinationPath "$zipPath"
           } else {
             cd build/${{ matrix.targetPlatform }}
-            zip -r ../../../game-${{ github.ref_name }}-${{ matrix.extension }} .
+            zip -r "$zipPath" .
           }
         shell: pwsh
 
       - name: Compute SHA256
         id: hash
         run: |
-          HASH=$(shasum -a 256 game-${{ github.ref_name }}-${{ matrix.extension }} | cut -d ' ' -f 1)
+          FILE="game-${{ github.ref_name }}-${{ matrix.extension }}"
+          HASH=$(shasum -a 256 "$FILE" | cut -d ' ' -f 1)
           echo "sha256=$HASH" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
