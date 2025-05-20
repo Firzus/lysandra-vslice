@@ -85,7 +85,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: manifest-data
+          name: manifest-part-${{ matrix.target }}
           path: manifest-data.txt
 
   generate-manifest:
@@ -95,21 +95,34 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: manifest-data
-          path: meta
+          pattern: manifest-part-*
+          path: parts
+          merge-multiple: true
 
-      - name: Create latest.json
+      - name: Merge manifest parts
+        run: |
+          mkdir -p meta
+          cat parts/*.txt > meta/manifest-data.txt
+
+      - name: Assemble latest.json
         run: |
           echo '{' > latest.json
           echo '  "version": "${{ github.ref_name }}",' >> latest.json
           echo '  "zip": {' >> latest.json
 
-          awk -F'|' '{ 
-            printf "    \"%s\": {\n", $1
-            printf "      \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/%s\",\n", $2
-            printf "      \"sha256\": \"%s\"\n", $3
-            if (NR != 3) { print "    }," } else { print "    }" }
-          }' meta/manifest-data.txt >> latest.json
+          TOTAL=$(wc -l < meta/manifest-data.txt)
+          i=1
+          while IFS='|' read -r os file hash; do
+            echo "    \"$os\": {" >> latest.json
+            echo "      \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$file\"," >> latest.json
+            echo "      \"sha256\": \"$hash\"" >> latest.json
+            if [ "$i" -lt "$TOTAL" ]; then
+              echo "    },"
+            else
+              echo "    }"
+            fi
+            i=$((i+1))
+          done < meta/manifest-data.txt
 
           echo '  }' >> latest.json
           echo '}' >> latest.json
