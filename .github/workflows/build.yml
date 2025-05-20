@@ -13,27 +13,27 @@ env:
 
 jobs:
   build:
-    name: Build for ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - target: windows
-            os: windows-latest
-            unityPlatform: StandaloneWindows64
+          - os: windows-latest
+            targetPlatform: StandaloneWindows64
+            target: windows
             extension: windows.zip
 
-          - target: macos
-            os: macos-latest
-            unityPlatform: StandaloneOSX
+          - os: macos-latest
+            targetPlatform: StandaloneOSX
+            target: macos
             extension: macos.zip
 
-          - target: linux
-            os: ubuntu-latest
-            unityPlatform: StandaloneLinux64
+          - os: ubuntu-latest
+            targetPlatform: StandaloneLinux64
+            target: linux
             extension: linux.zip
 
+    runs-on: ${{ matrix.os }}
+    name: Build for ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,19 +42,19 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: Library
-          key: Library-${{ matrix.target }}-${{ hashFiles('**/*.cs') }}
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('**/*.cs') }}
           restore-keys: |
-            Library-${{ matrix.target }}-
+            Library-${{ matrix.targetPlatform }}-
             Library-
 
       - uses: game-ci/unity-builder@v4
         with:
-          unityVersion: 2023.3.0f1
-          targetPlatform: ${{ matrix.unityPlatform }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          allowDirtyBuild: true
 
       - name: Zip Build
         run: |
-          cd build/${{ matrix.unityPlatform }}
+          cd build/${{ matrix.targetPlatform }}
           zip -r ../../../game-${{ github.ref_name }}-${{ matrix.extension }} .
         shell: bash
 
@@ -63,22 +63,23 @@ jobs:
         run: |
           HASH=$(shasum -a 256 game-${{ github.ref_name }}-${{ matrix.extension }} | cut -d ' ' -f 1)
           echo "sha256=$HASH" >> $GITHUB_OUTPUT
+        shell: bash
 
-      - name: Upload ZIP to release
+      - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: game-${{ github.ref_name }}-${{ matrix.extension }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Store build info
+      - name: Write manifest line
         run: |
-          echo "${{ matrix.target }}|game-${{ github.ref_name }}-${{ matrix.extension }}|${{ steps.hash.outputs.sha256 }}" >> build-meta.txt
+          echo "${{ matrix.target }}|game-${{ github.ref_name }}-${{ matrix.extension }}|${{ steps.hash.outputs.sha256 }}" >> manifest-data.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         with:
-          name: build-meta
-          path: build-meta.txt
+          name: manifest-parts
+          path: manifest-data.txt
 
   generate-manifest:
     name: Generate latest.json manifest
