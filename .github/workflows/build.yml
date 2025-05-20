@@ -118,9 +118,9 @@ jobs:
             echo "      \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$file\"," >> latest.json
             echo "      \"sha256\": \"${hash//$'\r'/}\"" >> latest.json
             if [ "$i" -lt "$TOTAL" ]; then
-              echo "    },"
+              echo "    }," >> latest.json
             else
-              echo "    }"
+              echo "    }" >> latest.json
             fi
             i=$((i+1))
           done < meta/manifest-data.txt
