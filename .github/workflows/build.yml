@@ -84,7 +84,7 @@ jobs:
           echo "${{ matrix.target }}|game-${{ github.ref_name }}-${{ matrix.extension }}|${{ steps.hash.outputs.sha256 }}" > manifest-${{ matrix.target }}.txt
 
       - name: Upload manifest part
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: manifest-part-${{ matrix.target }}
           path: manifest-${{ matrix.target }}.txt
