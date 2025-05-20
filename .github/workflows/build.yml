@@ -110,7 +110,7 @@ jobs:
             printf "      \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/%s\",\n", $2
             printf "      \"sha256\": \"%s\"\n", $3
             if (NR != 3) { print "    }," } else { print "    }" }
-          }' meta/build-meta.txt >> latest.json
+          }' meta/manifest-data.txt >> latest.json
 
           echo '  }' >> latest.json
           echo '}' >> latest.json
